@@ -87,8 +87,13 @@ async function lambdaHandleEvent(event, context) {
     };
 
     try {
-        let uploadResult = await s3.putObjectTagging(taggingParams).promise();
-        utils.generateSystemMessage("Tagging successful");
+        if (virusScanStatus === constants.STATUS_SKIPPED_FILE || virusScanStatus === constants.STATUS_INFECTED_FILE) {
+            let deleteResult = await s3.deleteObject({ Bucket: s3ObjectBucket, Key: s3ObjectKey }).promise();
+            utils.generateSystemMessage("Deletion Successful");
+        } else {
+            let uploadResult = await s3.putObjectTagging(taggingParams).promise();
+            utils.generateSystemMessage("Tagging successful");
+        }
     } catch(err) {
         console.log(err);
     } finally {
